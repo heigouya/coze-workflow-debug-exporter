@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3
+
+- Toolbar badge now shows the current run's node count (matching the popup) instead of the raw captured-record count, so the numbers are consistent.
+- The report page only shows runs started after the last local-cache clear, filtering out old runs that Coze's history/trace list endpoint returns; the summary now reads "本会话 N 次日志". Note: after clearing you won't see pre-clear history runs in the extension.
+- Fixes URL links in the modal not being underlined (a CSS specificity issue where `pre.json a` overrode the underline); links now have a solid underline and brighten on hover.
+
 ## v0.2.2
 
 - Detail modal now keeps a fixed height when switching All / Input / Output / Error tabs, so the panel no longer resizes (no layout shift); content is top-aligned and the body scrolls.
