@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Coze Workflow Debug Exporter",
+  "version": "0.1.0",
+  "description": "Capture Coze workflow trial-run node data locally and export it for AI debugging.",
+  "permissions": ["storage", "tabs", "unlimitedStorage"],
+  "host_permissions": [
+    "https://www.coze.cn/*",
+    "https://*.coze.cn/*",
+    "https://www.coze.com/*",
+    "https://*.coze.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Coze 调试导出"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.coze.cn/work_flow*",
+        "https://www.coze.com/work_flow*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["page-hook.js"],
+      "matches": [
+        "https://www.coze.cn/*",
+        "https://www.coze.com/*"
+      ]
+    }
+  ]
+}

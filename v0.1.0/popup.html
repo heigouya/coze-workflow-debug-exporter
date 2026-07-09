@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coze 调试导出</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="popup">
+    <main>
+      <h1>Coze 调试导出</h1>
+      <p id="context" class="muted">正在读取当前页面...</p>
+      <section class="stats">
+        <div>
+          <strong id="run-count">0</strong>
+          <span>次运行</span>
+        </div>
+        <div>
+          <strong id="node-count">0</strong>
+          <span>节点记录</span>
+        </div>
+      </section>
+      <button id="open-report" class="primary">打开报告页</button>
+      <button id="clear" class="secondary">清空本地捕获</button>
+      <p class="hint">请先在 Coze 工作流页面点击「试运行」，插件会自动捕获相关调试接口。数据只保存在本机 Chrome。</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
