@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.5
+
+- Switches report grouping to a Trace-first model using Coze `list_spans` and `get_trace` captures.
+- Counts runs by `trace_id` / `log_id`, so node detail requests no longer create duplicate runs.
+- Builds node cards from Trace spans and prefers `node_name`, `alias_name`, and `workflow_node_id` over DOM-derived labels.
+- Keeps `get_node_execute_history` as supplemental data for filling node input, output, and errors.
+
 ## v0.1.4
 
 - Cleans concatenated canvas labels such as `运行成功1s视频抽帧输入video输出...` into the real display name `视频抽帧`.

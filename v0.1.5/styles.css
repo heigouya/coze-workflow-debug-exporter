@@ -1,0 +1,310 @@
+:root {
+  color-scheme: light;
+  font-family:
+    Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --bg: #f7f8fb;
+  --panel: #fff;
+  --text: #1d1c23;
+  --muted: #69707d;
+  --line: #e6e8ef;
+  --brand: #4d53e8;
+  --danger: #d92d20;
+  --danger-bg: #fff2f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 9px 14px;
+}
+
+button.primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+button.secondary {
+  background: #eef0ff;
+  color: #3036b8;
+}
+
+.muted,
+.hint {
+  color: var(--muted);
+}
+
+.popup {
+  background: #fff;
+  min-width: 320px;
+}
+
+.popup main {
+  padding: 16px;
+}
+
+.popup h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.stats {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  margin: 14px 0;
+}
+
+.stats div {
+  background: #f6f7fb;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.stats strong {
+  display: block;
+  font-size: 24px;
+}
+
+.popup button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.hint {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.app-header {
+  align-items: center;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.app-header h1 {
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.toggle {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px 0;
+}
+
+.toolbar label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 5px;
+}
+
+select {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 520px;
+  padding: 9px 12px;
+}
+
+.content {
+  display: grid;
+  gap: 14px;
+  padding: 16px 24px 32px;
+}
+
+.node-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  overflow: hidden;
+}
+
+.node-card.is-error {
+  background: var(--danger-bg);
+  border-color: #ffb4a8;
+}
+
+.node-card > header {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.node-card h2 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+details {
+  border-top: 1px solid #f0f1f5;
+  padding: 0;
+}
+
+summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-weight: 700;
+  justify-content: flex-start;
+  padding: 10px 16px;
+}
+
+.section-heading {
+  align-items: center;
+  display: inline-flex;
+  gap: 10px;
+}
+
+.copy-icon {
+  background: transparent;
+  border-radius: 4px;
+  color: #4b5563;
+  display: inline-flex;
+  height: 22px;
+  justify-content: center;
+  padding: 0;
+  width: 22px;
+}
+
+.copy-icon:hover {
+  background: #eef0ff;
+}
+
+.copy-icon svg {
+  display: block;
+  height: 18px;
+  width: 18px;
+}
+
+pre.json {
+  background: #0d1117;
+  color: #d4d4d4;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 0 16px 16px;
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.json-key {
+  color: #7ee787;
+}
+
+.json-string {
+  color: #9cdcfe;
+}
+
+.json-number {
+  color: #b5cea8;
+}
+
+.json-boolean {
+  color: #569cd6;
+}
+
+.json-null {
+  color: #c586c0;
+}
+
+.empty {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+}
+
+.page-note {
+  text-align: center;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 0 24px 32px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.toast {
+  background: #101828;
+  border-radius: 8px;
+  bottom: 24px;
+  color: #fff;
+  left: 50%;
+  padding: 10px 14px;
+  position: fixed;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 760px) {
+  .app-header,
+  .actions,
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  select {
+    min-width: 0;
+    width: 100%;
+  }
+}
