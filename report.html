@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coze 工作流调试报告</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Coze 工作流调试报告</h1>
+        <p class="muted">本页展示插件在本机捕获到的 Coze 试运行接口数据。</p>
+      </div>
+      <div class="actions">
+        <label class="toggle">
+          <input id="redact" type="checkbox" checked />
+          复制时脱敏
+        </label>
+        <button id="copy-all" class="primary">一键复制全部</button>
+        <button id="refresh" class="secondary">刷新</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <label>
+        运行记录
+        <select id="run-select"></select>
+      </label>
+      <span id="summary" class="muted"></span>
+    </section>
+
+    <main id="content" class="content"></main>
+    <nav id="pagination" class="pagination" aria-label="节点分页"></nav>
+
+    <template id="node-card-template">
+      <article class="node-card">
+        <header>
+          <div>
+            <h2></h2>
+            <p class="meta"></p>
+          </div>
+          <button class="copy-node secondary">复制本节点</button>
+        </header>
+        <details open>
+          <summary>输入</summary>
+          <pre class="json input"></pre>
+        </details>
+        <details open>
+          <summary>输出</summary>
+          <pre class="json output"></pre>
+        </details>
+        <details class="error-block">
+          <summary>错误信息</summary>
+          <pre class="json error"></pre>
+        </details>
+      </article>
+    </template>
+
+    <script src="core.js"></script>
+    <script src="report.js"></script>
+  </body>
+</html>
