@@ -1,6 +1,6 @@
 {
   "name": "coze-workflow-debug-exporter",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Chrome extension for capturing and exporting Coze workflow debug data.",
   "scripts": {

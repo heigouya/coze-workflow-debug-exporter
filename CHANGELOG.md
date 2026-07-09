@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.3
+
+- Moves section copy icons next to the section labels instead of the far right edge.
+- Refines the copy icon to a clearer overlapping-rectangles symbol.
+- Filters execution result panel labels such as "运行成功" and elapsed time text from node title extraction.
+- Keeps popup/report statistics grouped by node execution unit rather than visual panels.
+
 ## v0.1.2
 
 - Replaces text copy buttons in JSON sections with icon-only copy controls.
