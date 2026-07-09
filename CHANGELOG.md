@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0
+
+- Redesigns the report page from a paginated vertical list into a Masonry gallery where each node output is a card.
+- Adds a compact / default / loose layout density switch, persisted to localStorage.
+- Cards show a truncated, syntax-highlighted JSON preview with a fixed height; only the detail modal scrolls, so the gallery no longer traps the mouse wheel.
+- Clicking a card opens a dark VS Code-style detail modal over a light overlay, with input / output / error segments and an All / Input / Output / Error tab switch.
+- The modal supports previous/next node navigation, Esc and overlay-click to close.
+- Refreshes the visual system (workbench light theme, refined cards, VS Code Dark+ JSON colors) without touching the capture pipeline.
+
 ## v0.1.7
 
 - Formats run selector labels as workflow name plus actual run time instead of raw workflow/log/trace IDs.
