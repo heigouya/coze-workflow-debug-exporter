@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.1
+
+- Switches the gallery from CSS multi-column to a JS masonry that fills columns in node order, so cards read left-to-right (1, 2, 3 …) instead of top-to-bottom.
+- Moves the per-card copy icon right next to the node name; pushes the status badge to the far right.
+- Aligns the modal section copy icon next to its section title (input / output / error) instead of the far right.
+- Fixes the modal prev/next arrows being clipped by moving them outside the panel's overflow area.
+- Error node cards are now fully tinted red (background + title), not just a red border.
+- Rewrites JSON highlighting to a VS Code-style tokenizer with bracket pair colorization (gold / purple / blue by depth) and punctuation coloring.
+
 ## v0.2.0
 
 - Redesigns the report page from a paginated vertical list into a Masonry gallery where each node output is a card.
