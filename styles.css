@@ -190,14 +190,23 @@ details {
 }
 
 summary {
+  align-items: center;
   cursor: pointer;
+  display: flex;
   font-weight: 700;
+  justify-content: space-between;
   padding: 10px 16px;
 }
 
+summary .copy-section {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
 pre.json {
-  background: #111827;
-  color: #f8fafc;
+  background: #0d1117;
+  color: #d4d4d4;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 12px;
   line-height: 1.55;
@@ -207,6 +216,26 @@ pre.json {
   padding: 12px;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.json-key {
+  color: #7ee787;
+}
+
+.json-string {
+  color: #9cdcfe;
+}
+
+.json-number {
+  color: #b5cea8;
+}
+
+.json-boolean {
+  color: #569cd6;
+}
+
+.json-null {
+  color: #c586c0;
 }
 
 .empty {

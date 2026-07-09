@@ -42,16 +42,25 @@
           </div>
           <button class="copy-node secondary">复制本节点</button>
         </header>
-        <details open>
-          <summary>输入</summary>
+        <details class="json-section" open>
+          <summary>
+            <span>输入</span>
+            <button class="copy-section secondary" data-section="input" type="button">复制输入</button>
+          </summary>
           <pre class="json input"></pre>
         </details>
-        <details open>
-          <summary>输出</summary>
+        <details class="json-section" open>
+          <summary>
+            <span>输出</span>
+            <button class="copy-section secondary" data-section="output" type="button">复制输出</button>
+          </summary>
           <pre class="json output"></pre>
         </details>
-        <details class="error-block">
-          <summary>错误信息</summary>
+        <details class="json-section error-block">
+          <summary>
+            <span>错误信息</span>
+            <button class="copy-section secondary" data-section="error" type="button">复制错误</button>
+          </summary>
           <pre class="json error"></pre>
         </details>
       </article>

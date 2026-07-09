@@ -261,6 +261,69 @@
     return JSON.stringify(finalValue, null, 2);
   }
 
+  function fingerprintRecord(record) {
+    if (!record || typeof record !== "object") return String(record);
+    const payload = {
+      kind: record.kind,
+      endpoint: record.endpoint,
+      method: record.method,
+      workflowId: record.workflowId,
+      spaceId: record.spaceId,
+      executeId: record.executeId,
+      logId: record.logId,
+      nodeId: record.nodeId,
+      nodeName: record.nodeName,
+      nodeType: record.nodeType,
+      batchIndex: record.batchIndex,
+      subExecuteId: record.subExecuteId,
+      status: record.status,
+      input: record.input,
+      output: record.output,
+      error: record.error,
+      rawRequest: record.rawRequest,
+      rawResponse: record.rawResponse,
+    };
+    return stableFingerprintJson(payload);
+  }
+
+  function stableFingerprintJson(value) {
+    if (value === undefined) return "undefined";
+    if (value === null || typeof value !== "object") return JSON.stringify(value);
+    if (Array.isArray(value)) {
+      return `[${value.map((item) => stableFingerprintJson(item)).join(",")}]`;
+    }
+    return `{${Object.keys(value)
+      .sort()
+      .filter((key) => value[key] !== undefined)
+      .map((key) => `${JSON.stringify(key)}:${stableFingerprintJson(value[key])}`)
+      .join(",")}}`;
+  }
+
+  function renderJsonHtml(value, redact) {
+    return highlightJson(stableJson(value, redact));
+  }
+
+  function highlightJson(json) {
+    return escapeHtml(json).replace(
+      /("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(?=\s*:))|("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*")|\b(true|false)\b|\b(null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+      (match, key, string, bool, nil, number) => {
+        if (key) return `<span class="json-key">${key}</span>`;
+        if (string) return `<span class="json-string">${string}</span>`;
+        if (bool) return `<span class="json-boolean">${bool}</span>`;
+        if (nil) return `<span class="json-null">${nil}</span>`;
+        if (number) return `<span class="json-number">${number}</span>`;
+        return match;
+      }
+    );
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   function buildAiPrompt(run, nodes, options) {
     const opts = options || {};
     const ordered = [...(nodes || [])].sort((a, b) => {
@@ -321,6 +384,8 @@
   function groupRecords(records) {
     const sorted = [...(records || [])].sort((a, b) => a.timestamp - b.timestamp);
     const runs = new Map();
+    const recordFingerprintsByRun = new Map();
+    const nodeFingerprintsByRun = new Map();
     for (const record of sorted) {
       const key =
         record.executeId ||
@@ -337,15 +402,29 @@
           records: [],
           nodes: [],
         });
+        recordFingerprintsByRun.set(key, new Set());
+        nodeFingerprintsByRun.set(key, new Set());
       }
       const run = runs.get(key);
       run.workflowId = run.workflowId || record.workflowId;
       run.spaceId = run.spaceId || record.spaceId;
       run.executeId = run.executeId || record.executeId;
       run.logId = run.logId || record.logId;
-      run.records.push(record);
+      const recordFingerprint = fingerprintRecord(record);
+      if (!recordFingerprintsByRun.get(key).has(recordFingerprint)) {
+        recordFingerprintsByRun.get(key).add(recordFingerprint);
+        run.records.push(record);
+      }
       if (record.kind === "node-history") {
-        run.nodes.push({ ...record, order: run.nodes.length + 1 });
+        const nodeFingerprint = fingerprintRecord({
+          ...record,
+          timestamp: undefined,
+          id: undefined,
+        });
+        if (!nodeFingerprintsByRun.get(key).has(nodeFingerprint)) {
+          nodeFingerprintsByRun.get(key).add(nodeFingerprint);
+          run.nodes.push({ ...record, order: run.nodes.length + 1 });
+        }
       }
     }
     return Array.from(runs.values()).sort((a, b) => b.capturedAt - a.capturedAt);
@@ -353,10 +432,12 @@
 
   return {
     buildAiPrompt,
+    fingerprintRecord,
     groupRecords,
     isInterestingCozeRequest,
     normalizeCapture,
     redactSensitiveValue,
+    renderJsonHtml,
     stableJson,
     tryJson,
   };

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.1
+
+- Deduplicates repeated workflow/node capture records.
+- Prevents repeated node cards when Coze refreshes node history after switching tabs.
+- Adds VS Code-like JSON syntax highlighting in the report page.
+- Adds independent copy buttons for input, output, and error sections.
+
 ## v0.1.0
 
 - First MVP of the Chrome extension.

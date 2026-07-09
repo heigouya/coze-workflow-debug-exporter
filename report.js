@@ -74,15 +74,14 @@ function renderNodeCard(node, index) {
 
   if (/fail|error|失败|异常/i.test(status) || node.error) card.classList.add("is-error");
 
-  card.querySelector(".input").textContent = CozeDebuggerCore.stableJson(
-    node.input ?? node.rawRequest,
-    false
-  );
-  card.querySelector(".output").textContent = CozeDebuggerCore.stableJson(
-    node.output ?? node.rawResponse,
-    false
-  );
-  card.querySelector(".error").textContent = CozeDebuggerCore.stableJson(node.error, false);
+  const values = {
+    input: node.input ?? node.rawRequest,
+    output: node.output ?? node.rawResponse,
+    error: node.error,
+  };
+  renderJsonBlock(card.querySelector(".input"), values.input);
+  renderJsonBlock(card.querySelector(".output"), values.output);
+  renderJsonBlock(card.querySelector(".error"), values.error);
   if (!node.error) errorBlock.hidden = true;
 
   card.querySelector(".copy-node").addEventListener("click", async () => {
@@ -92,7 +91,22 @@ function renderNodeCard(node, index) {
     toast("已复制本节点");
   });
 
+  card.querySelectorAll(".copy-section").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const section = button.dataset.section;
+      const redact = document.getElementById("redact").checked;
+      await navigator.clipboard.writeText(CozeDebuggerCore.stableJson(values[section], redact));
+      toast(`已复制${button.textContent.replace("复制", "")}`);
+    });
+  });
+
   return card;
+}
+
+function renderJsonBlock(element, value) {
+  element.innerHTML = CozeDebuggerCore.renderJsonHtml(value, false);
 }
 
 function fallbackNodes(records) {

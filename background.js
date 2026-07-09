@@ -52,6 +52,11 @@ async function handleCapture(payload, sender) {
   });
 
   const records = await getRecords();
+  const fingerprint = CozeDebuggerCore.fingerprintRecord(record);
+  if (records.some((existing) => CozeDebuggerCore.fingerprintRecord(existing) === fingerprint)) {
+    return { ok: true, duplicate: true, record };
+  }
+
   records.push(record);
   const limited = records.slice(-MAX_RECORDS);
   await setRecords(limited);
