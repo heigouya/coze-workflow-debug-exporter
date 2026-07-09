@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.4
+
+- Cleans concatenated canvas labels such as `运行成功1s视频抽帧输入video输出...` into the real display name `视频抽帧`.
+- Re-sanitizes cached invalid labels during report grouping, so old bad labels no longer require clearing local history.
+- Replaces the copy control with the user-provided SVG icon and adapts it to the report UI size.
+
 ## v0.1.3
 
 - Moves section copy icons next to the section labels instead of the far right edge.
