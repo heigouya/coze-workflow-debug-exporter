@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.6
+
+- Focuses popup statistics on the latest captured run for the active workflow instead of summing all local history.
+- Allows switching Coze historical logs without manually clearing local captures first.
+- Keeps report history available through the run selector while defaulting to the newest capture.
+
 ## v0.1.5
 
 - Switches report grouping to a Trace-first model using Coze `list_spans` and `get_trace` captures.

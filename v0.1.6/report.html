@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coze 工作流调试报告</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Coze 工作流调试报告</h1>
+        <p class="muted">本页展示插件在本机捕获到的 Coze 试运行接口数据。</p>
+      </div>
+      <div class="actions">
+        <label class="toggle">
+          <input id="redact" type="checkbox" checked />
+          复制时脱敏
+        </label>
+        <button id="copy-all" class="primary">一键复制全部</button>
+        <button id="refresh" class="secondary">刷新</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <label>
+        运行记录
+        <select id="run-select"></select>
+      </label>
+      <span id="summary" class="muted"></span>
+    </section>
+
+    <main id="content" class="content"></main>
+    <nav id="pagination" class="pagination" aria-label="节点分页"></nav>
+
+    <template id="node-card-template">
+      <article class="node-card">
+        <header>
+          <div>
+            <h2></h2>
+            <p class="meta"></p>
+          </div>
+          <button class="copy-node secondary">复制本节点</button>
+        </header>
+        <details class="json-section" open>
+          <summary>
+            <span class="section-heading">
+              <span>输入</span>
+              <button class="copy-section copy-icon" data-section="input" type="button" aria-label="复制输入" title="复制输入">
+                <svg aria-hidden="true" viewBox="0 0 1024 1024" focusable="false">
+                  <path d="M661.333333 234.666667A64 64 0 0 1 725.333333 298.666667v597.333333a64 64 0 0 1-64 64h-469.333333A64 64 0 0 1 128 896V298.666667a64 64 0 0 1 64-64z m-21.333333 85.333333H213.333333v554.666667h426.666667v-554.666667z m191.829333-256a64 64 0 0 1 63.744 57.856l0.256 6.144v575.701333a42.666667 42.666667 0 0 1-85.034666 4.992l-0.298667-4.992V149.333333H384a42.666667 42.666667 0 0 1-42.368-37.674666L341.333333 106.666667a42.666667 42.666667 0 0 1 37.674667-42.368L384 64h447.829333z" fill="currentColor"></path>
+                </svg>
+              </button>
+            </span>
+          </summary>
+          <pre class="json input"></pre>
+        </details>
+        <details class="json-section" open>
+          <summary>
+            <span class="section-heading">
+              <span>输出</span>
+              <button class="copy-section copy-icon" data-section="output" type="button" aria-label="复制输出" title="复制输出">
+                <svg aria-hidden="true" viewBox="0 0 1024 1024" focusable="false">
+                  <path d="M661.333333 234.666667A64 64 0 0 1 725.333333 298.666667v597.333333a64 64 0 0 1-64 64h-469.333333A64 64 0 0 1 128 896V298.666667a64 64 0 0 1 64-64z m-21.333333 85.333333H213.333333v554.666667h426.666667v-554.666667z m191.829333-256a64 64 0 0 1 63.744 57.856l0.256 6.144v575.701333a42.666667 42.666667 0 0 1-85.034666 4.992l-0.298667-4.992V149.333333H384a42.666667 42.666667 0 0 1-42.368-37.674666L341.333333 106.666667a42.666667 42.666667 0 0 1 37.674667-42.368L384 64h447.829333z" fill="currentColor"></path>
+                </svg>
+              </button>
+            </span>
+          </summary>
+          <pre class="json output"></pre>
+        </details>
+        <details class="json-section error-block">
+          <summary>
+            <span class="section-heading">
+              <span>错误信息</span>
+              <button class="copy-section copy-icon" data-section="error" type="button" aria-label="复制错误信息" title="复制错误信息">
+                <svg aria-hidden="true" viewBox="0 0 1024 1024" focusable="false">
+                  <path d="M661.333333 234.666667A64 64 0 0 1 725.333333 298.666667v597.333333a64 64 0 0 1-64 64h-469.333333A64 64 0 0 1 128 896V298.666667a64 64 0 0 1 64-64z m-21.333333 85.333333H213.333333v554.666667h426.666667v-554.666667z m191.829333-256a64 64 0 0 1 63.744 57.856l0.256 6.144v575.701333a42.666667 42.666667 0 0 1-85.034666 4.992l-0.298667-4.992V149.333333H384a42.666667 42.666667 0 0 1-42.368-37.674666L341.333333 106.666667a42.666667 42.666667 0 0 1 37.674667-42.368L384 64h447.829333z" fill="currentColor"></path>
+                </svg>
+              </button>
+            </span>
+          </summary>
+          <pre class="json error"></pre>
+        </details>
+      </article>
+    </template>
+
+    <script src="core.js"></script>
+    <script src="report.js"></script>
+  </body>
+</html>
