@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.4
+
+- Reverts the v0.2.3 "only show runs since last clear" filter: it wrongly hid the current run whenever that run started before the last cache clear, leaving the report page empty. The report page shows all captured runs again (same as v0.2.2).
+- Keeps the v0.2.3 badge (node count) and URL-underline fixes.
+
 ## v0.2.3
 
 - Toolbar badge now shows the current run's node count (matching the popup) instead of the raw captured-record count, so the numbers are consistent.
