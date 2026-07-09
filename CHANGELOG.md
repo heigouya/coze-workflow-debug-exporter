@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.2
+
+- Detail modal now keeps a fixed height when switching All / Input / Output / Error tabs, so the panel no longer resizes (no layout shift); content is top-aligned and the body scrolls.
+- Cards have a clear hover state (accent border, ring, and lift); fixed the entrance animation locking the transform and swallowing the hover effect.
+- URLs inside JSON string values are linkified: clickable and opened in a new tab inside the modal, non-interactive in card previews so the whole card stays one click target.
+- Redesigns the extension popup to match the report page (logo, connected-workflow chip with click-to-copy id, refined stat tiles, fixed 340px width).
+- Replaces the placeholder icon with a custom orange (#E94618) icon at 16/32/48/128; adds `icons` and `action.default_icon`.
+- Renames the extension to "Coze 调试" and updates the description to Chinese.
+
 ## v0.2.1
 
 - Switches the gallery from CSS multi-column to a JS masonry that fills columns in node order, so cards read left-to-right (1, 2, 3 …) instead of top-to-bottom.
