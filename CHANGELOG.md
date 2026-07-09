@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.2
+
+- Replaces text copy buttons in JSON sections with icon-only copy controls.
+- Prefers captured canvas node labels over numeric node IDs in report card titles.
+- Groups popup stats and report runs by node execution unit, so one node trial is not split into separate input/output runs.
+
 ## v0.1.1
 
 - Deduplicates repeated workflow/node capture records.
