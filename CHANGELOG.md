@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.7
+
+- Formats run selector labels as workflow name plus actual run time instead of raw workflow/log/trace IDs.
+- Extracts workflow names and run start times from captured Coze Trace/log payloads, falling back to capture time when needed.
+- Moves local cache clearing from the popup to the report page and renames it to local cache clearing.
+- Adds report summary text showing total local log count.
+
 ## v0.1.6
 
 - Focuses popup statistics on the latest captured run for the active workflow instead of summing all local history.
