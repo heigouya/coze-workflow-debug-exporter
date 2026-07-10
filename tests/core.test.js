@@ -91,6 +91,24 @@ test("redacts obvious secrets and signed URL parameters", () => {
   assert.equal(redacted.nested.Authorization, "[REDACTED]");
 });
 
+test("redacts common browser session and API credential fields", () => {
+  const redacted = redactSensitiveValue({
+    cookie: "sid=abc",
+    token: "opaque-value",
+    refresh_token: "refresh-value",
+    api_key: "api-key-value",
+    session_id: "session-value",
+    ordinary_key: "safe-value",
+  });
+
+  assert.equal(redacted.cookie, "[REDACTED]");
+  assert.equal(redacted.token, "[REDACTED]");
+  assert.equal(redacted.refresh_token, "[REDACTED]");
+  assert.equal(redacted.api_key, "[REDACTED]");
+  assert.equal(redacted.session_id, "[REDACTED]");
+  assert.equal(redacted.ordinary_key, "safe-value");
+});
+
 test("builds ordered AI prompt text with errored nodes highlighted", () => {
   const text = buildAiPrompt(
     {

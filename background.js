@@ -3,12 +3,20 @@ importScripts("core.js");
 const STORAGE_KEY = "cozeWorkflowDebugRecords";
 const LABELS_KEY = "cozeWorkflowNodeLabels";
 const MAX_RECORDS = 500;
+let captureQueue = Promise.resolve();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || !message.type) return false;
 
   if (message.type === "COZE_NETWORK_CAPTURE") {
-    handleCapture(message.payload, sender).then(sendResponse);
+    const task = captureQueue.then(() => handleCapture(message.payload, sender));
+    captureQueue = task.catch(() => undefined);
+    task.then(sendResponse).catch((error) => {
+      sendResponse({
+        ok: false,
+        error: String(error && error.message ? error.message : error),
+      });
+    });
     return true;
   }
 

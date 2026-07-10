@@ -20,7 +20,7 @@
   ];
 
   const SECRET_KEY_RE =
-    /(api[_-]?token|access[_-]?token|authorization|password|secret|credential|signature|x[-_]?tos[-_]?signature|x[-_]?tos[-_]?credential)/i;
+    /(api[_-]?(token|key)|access[_-]?token|refresh[_-]?token|csrf[_-]?token|(^|[_-])token($|[_-])|authorization|cookie|session([_-]?id)?|password|secret|credential|signature|x[-_]?tos[-_]?signature|x[-_]?tos[-_]?credential)/i;
   const FALLBACK_RUN_BUCKET_MS = 120000;
   const NODE_TYPE_LABELS = {
     VideoFrameExtractor: "视频抽帧",
