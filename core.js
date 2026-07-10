@@ -1014,6 +1014,14 @@
     };
   }
 
+  function statusBadgeClass(status) {
+    const value = String(status || "unknown");
+    if (/fail|error|失败|异常/i.test(value)) return "is-fail";
+    if (/running|pending|处理中|运行中|等待/i.test(value)) return "is-running";
+    if (/success|成功|ok|完成/i.test(value)) return "is-ok";
+    return "is-unknown";
+  }
+
   function formatRunLabel(run) {
     const name = cleanWorkflowName(run?.workflowName) || "未命名工作流";
     const timestamp = run?.startedAt || run?.capturedAt || run?.timestamp;
@@ -1058,6 +1066,7 @@
     renderJsonHtml,
     sanitizeNodeLabels,
     stableJson,
+    statusBadgeClass,
     summarizeRuns,
     tryJson,
   };

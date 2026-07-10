@@ -507,6 +507,16 @@ select:focus {
   color: var(--danger);
 }
 
+.status-badge.is-running {
+  background: #fff3d6;
+  color: #946200;
+}
+
+.status-badge.is-unknown {
+  background: #eef0f3;
+  color: #6b7280;
+}
+
 .copy-node {
   flex: none;
   opacity: 0;

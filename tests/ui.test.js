@@ -65,3 +65,10 @@ test("popup and report show the approximate cache size", () => {
   assert.match(reportJs, /storageStats/);
   assert.match(reportJs, /缓存约/);
 });
+
+test("refresh falls back to the first run when the previous selection disappeared", () => {
+  const reportJs = fs.readFileSync(path.join(__dirname, "../report.js"), "utf8");
+
+  assert.match(reportJs, /state\.runs\.some\(\(run\) => run\.id === state\.selectedRunId\)/);
+  assert.match(reportJs, /state\.selectedRunId = state\.runs\[0\]/);
+});

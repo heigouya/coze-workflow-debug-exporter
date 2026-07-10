@@ -13,6 +13,7 @@ const {
   redactSensitiveValue,
   sanitizeNodeLabels,
   summarizeRuns,
+  statusBadgeClass,
 } = require("../core.js");
 
 test("normalizes workflow test_run response with debug_url and execute_id", () => {
@@ -145,6 +146,13 @@ test("redacts common browser session and API credential fields", () => {
   assert.equal(redacted.api_key, "[REDACTED]");
   assert.equal(redacted.session_id, "[REDACTED]");
   assert.equal(redacted.ordinary_key, "safe-value");
+});
+
+test("uses different badge colors for success, running, unknown, and failure", () => {
+  assert.equal(statusBadgeClass("success"), "is-ok");
+  assert.equal(statusBadgeClass("running"), "is-running");
+  assert.equal(statusBadgeClass("unknown"), "is-unknown");
+  assert.equal(statusBadgeClass("fail"), "is-fail");
 });
 
 test("builds ordered AI prompt text with errored nodes highlighted", () => {

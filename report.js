@@ -47,7 +47,9 @@ async function load() {
   const data = await send({ type: "GET_RUNS" });
   state.runs = data?.runs || [];
   state.storageStats = data?.storageStats || { recordCount: 0, approxChars: 0 };
-  if (!state.selectedRunId && state.runs[0]) state.selectedRunId = state.runs[0].id;
+  if (!state.runs.some((run) => run.id === state.selectedRunId)) {
+    state.selectedRunId = state.runs[0] ? state.runs[0].id : "";
+  }
   render();
 }
 
@@ -121,7 +123,10 @@ function renderNodeCard(node, index) {
   const card = template.content.firstElementChild.cloneNode(true);
 
   const status = node.status || "unknown";
-  const isError = /fail|error|失败|异常/i.test(status) || Boolean(node.error);
+  const iterationError = Array.isArray(node.iterations) && node.iterations.some((iteration) =>
+    /fail|error|失败|异常/i.test(iteration.status || "") || Boolean(iteration.error)
+  );
+  const isError = /fail|error|失败|异常/i.test(status) || Boolean(node.error) || iterationError;
   if (isError) card.classList.add("is-error");
 
   card.querySelector(".card-index").textContent = index + 1;
@@ -130,7 +135,7 @@ function renderNodeCard(node, index) {
 
   const badge = card.querySelector(".status-badge");
   badge.textContent = isError ? "失败" : statusLabel(status);
-  badge.classList.add(isError ? "is-fail" : "is-ok");
+  badge.classList.add(CozeDebuggerCore.statusBadgeClass(isError ? "fail" : status));
 
   const meta = card.querySelector(".card-meta");
   const parts = [`类型 ${node.nodeType || node.type || "未知"}`];
@@ -273,7 +278,7 @@ function renderModal() {
   modal.querySelector(".modal-title").textContent =
     `${state.modal.index + 1}. ${node.nodeName || node.name || node.endpoint || "未命名节点"}`;
   const metaParts = [`类型 ${node.nodeType || node.type || "未知"}`, `状态 ${statusLabel(status)}`];
-  if (node.duration) metaParts.push(`耗时 ${node.duration}`);
+  if (activeRecord.duration || node.duration) metaParts.push(`耗时 ${activeRecord.duration || node.duration}`);
   if (iterations.length) {
     metaParts.push(`批次 ${state.modal.iterationIndex + 1}/${iterations.length}`);
   }
@@ -423,6 +428,8 @@ function nodeValues(node) {
 function statusLabel(status) {
   if (/success|成功|ok/i.test(status)) return "成功";
   if (/fail|error|失败|异常/i.test(status)) return "失败";
+  if (/running|pending|处理中|运行中|等待/i.test(status)) return "运行中";
+  if (!status || /unknown/i.test(status)) return "未知";
   return status;
 }
 
