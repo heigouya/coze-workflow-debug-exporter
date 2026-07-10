@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.5
+
+- Serializes capture writes so simultaneous Trace/history responses cannot overwrite each other in local storage.
+- Preserves loop and batch executions under one node and adds a batch selector to the detail modal.
+- Expands copy-time redaction for cookies, generic tokens, refresh tokens, API keys, and sessions.
+- Caps local capture storage at 500 records and approximately 40 million characters, with cache-size indicators in popup and report views.
+- Parses each captured request/response body once and removes quadratic queue traversal from deep-field lookup.
+- Gives success, running, unknown, and failure distinct badge states and restores report selection fallback after refresh.
+- Restores the Node test suite with 30 regression tests.
+
 ## v0.2.4
 
 - Reverts the v0.2.3 "only show runs since last clear" filter: it wrongly hid the current run whenever that run started before the last cache clear, leaving the report page empty. The report page shows all captured runs again (same as v0.2.2).

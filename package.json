@@ -1,9 +1,10 @@
 {
   "name": "coze-workflow-debug-exporter",
-  "version": "0.1.7",
+  "version": "0.2.5",
   "private": true,
   "description": "Chrome extension for capturing and exporting Coze workflow debug data.",
   "scripts": {
-    "check": "for f in *.js; do node --check \"$f\"; done"
+    "test": "node --test tests/*.test.js",
+    "check": "for f in *.js tests/*.js; do node --check \"$f\"; done"
   }
 }
