@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.7
+
+- Fixes Mac/Windows report differences caused by browser-dependent capture order.
+- Uses Trace node order as the final report order, so node cards and copied prompts stay aligned with the workflow.
+- Treats `试运行中...` canvas text as temporary status text instead of a real node name.
+- Adds regression tests for trial-running labels and node-history-before-trace ordering.
+
 ## v0.2.6
 
 - Preserves every repeated Trace span for loop-body and batch nodes, even when Coze omits `batch_index` and `sub_execute_id`.

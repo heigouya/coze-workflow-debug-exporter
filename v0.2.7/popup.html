@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coze 调试</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="popup">
+    <main>
+      <header class="popup-head">
+        <img class="popup-logo" src="icons/icon48.png" alt="" />
+        <div class="popup-head-text">
+          <h1>Coze 调试</h1>
+          <p class="popup-sub">抓取试运行数据，导出给 AI 排查</p>
+        </div>
+      </header>
+
+      <div id="context" class="popup-context">
+        <span class="ctx-dot"></span>
+        <span class="ctx-text muted">正在读取当前页面…</span>
+      </div>
+
+      <section class="stats">
+        <div>
+          <strong id="run-count">0</strong>
+          <span>当前日志</span>
+        </div>
+        <div>
+          <strong id="node-count">0</strong>
+          <span>节点记录</span>
+        </div>
+      </section>
+
+      <p id="cache-size" class="popup-cache muted">本地缓存：正在计算…</p>
+
+      <button id="open-report" class="primary">打开报告页</button>
+
+      <p class="hint">
+        在 Coze 工作流页面点击「试运行」或切换历史日志，插件会聚焦最新捕获的当前日志。本地缓存请到报告页管理。
+      </p>
+    </main>
+    <script src="core.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
