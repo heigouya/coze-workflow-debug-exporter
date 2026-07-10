@@ -614,23 +614,42 @@
       lines.push(`类型: ${node.nodeType || node.type || "(未知)"}`);
       lines.push(`状态: ${status}`);
       if (node.duration) lines.push(`耗时: ${node.duration}`);
-      if (node.error || /fail|error|失败|异常/i.test(status)) {
+
+      const iterations = Array.isArray(node.iterations) ? node.iterations : [];
+      if (iterations.length) {
+        lines.push(`批次数: ${iterations.length}`);
+        iterations.forEach((iteration, iterationIndex) => {
+          const iterationStatus = iteration.status || "unknown";
+          lines.push("");
+          lines.push(`### 批次 ${iterationIndex + 1}/${iterations.length}`);
+          lines.push(`状态: ${iterationStatus}`);
+          if (iteration.duration) lines.push(`耗时: ${iteration.duration}`);
+          appendPromptValues(lines, iteration, iterationStatus, opts);
+        });
+        return;
+      }
+
+      appendPromptValues(lines, node, status, opts);
+    });
+
+    return lines.join("\n");
+  }
+
+  function appendPromptValues(lines, record, status, opts) {
+      if (record.error || /fail|error|失败|异常/i.test(status)) {
         lines.push("错误信息:");
         lines.push("```json");
-        lines.push(stableJson(node.error || node.rawResponse || "(未捕获)", opts.redact));
+        lines.push(stableJson(record.error || record.rawResponse || "(未捕获)", opts.redact));
         lines.push("```");
       }
       lines.push("输入:");
       lines.push("```json");
-      lines.push(stableJson(node.input, opts.redact));
+      lines.push(stableJson(record.input, opts.redact));
       lines.push("```");
       lines.push("输出:");
       lines.push("```json");
-      lines.push(stableJson(node.output, opts.redact));
+      lines.push(stableJson(record.output, opts.redact));
       lines.push("```");
-    });
-
-    return lines.join("\n");
   }
 
   function formatDate(timestamp) {
@@ -779,6 +798,7 @@
 
   function mergeNode(target, source) {
     if (!target) return;
+    mergeNodeIterations(target, source);
     target.nodeName =
       source.kind === "trace-node"
         ? preferNodeName(source.nodeName, target.nodeName)
@@ -793,6 +813,64 @@
     target.error = target.error === undefined ? source.error : target.error;
     target.rawRequest = target.rawRequest === undefined ? source.rawRequest : target.rawRequest;
     target.rawResponse = mergeRawResponse(target.rawResponse, source.rawResponse);
+  }
+
+  function mergeNodeIterations(target, source) {
+    const targetIsIteration = hasIterationIdentity(target);
+    const sourceIsIteration = hasIterationIdentity(source);
+    if (!targetIsIteration && !sourceIsIteration && !Array.isArray(target.iterations)) return;
+
+    const iterations = Array.isArray(target.iterations) ? target.iterations : [];
+    if (targetIsIteration) upsertIteration(iterations, target);
+    if (sourceIsIteration) upsertIteration(iterations, source);
+    if (!iterations.length) return;
+
+    target.iterations = iterations.sort((a, b) => {
+      const ai = Number.isFinite(a.batchIndex) ? a.batchIndex : Number.MAX_SAFE_INTEGER;
+      const bi = Number.isFinite(b.batchIndex) ? b.batchIndex : Number.MAX_SAFE_INTEGER;
+      if (ai !== bi) return ai - bi;
+      return String(a.subExecuteId || "").localeCompare(String(b.subExecuteId || ""));
+    });
+  }
+
+  function hasIterationIdentity(record) {
+    return Boolean(
+      record &&
+        (record.batchIndex !== undefined ||
+          record.subExecuteId)
+    );
+  }
+
+  function iterationKey(record) {
+    if (record.subExecuteId) return `sub:${record.subExecuteId}`;
+    return `batch:${record.batchIndex}`;
+  }
+
+  function upsertIteration(iterations, record) {
+    const key = iterationKey(record);
+    const existing = iterations.find((item) => item.id === key);
+    if (!existing) {
+      iterations.push({
+        id: key,
+        batchIndex: record.batchIndex,
+        subExecuteId: record.subExecuteId,
+        status: record.status,
+        duration: record.duration,
+        input: record.input,
+        output: record.output,
+        error: record.error,
+        rawRequest: record.rawRequest,
+        rawResponse: record.rawResponse,
+      });
+      return;
+    }
+    existing.status = preferValue(existing.status, record.status, "unknown");
+    existing.duration = existing.duration || record.duration;
+    existing.input = existing.input === undefined ? record.input : existing.input;
+    existing.output = existing.output === undefined ? record.output : existing.output;
+    existing.error = existing.error === undefined ? record.error : existing.error;
+    existing.rawRequest = existing.rawRequest === undefined ? record.rawRequest : existing.rawRequest;
+    existing.rawResponse = mergeRawResponse(existing.rawResponse, record.rawResponse);
   }
 
   function preferValue(current, next, emptyValue) {

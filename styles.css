@@ -800,6 +800,27 @@ body.modal-open {
   margin: 0;
 }
 
+.batch-picker {
+  align-items: center;
+  color: #cbd0d8;
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.batch-picker[hidden] {
+  display: none;
+}
+
+.batch-picker select {
+  background: var(--code-bg-2);
+  border-color: var(--code-line);
+  color: var(--code-text);
+  min-width: 150px;
+  padding: 6px 9px;
+}
+
 .modal-close {
   align-items: center;
   background: rgba(255, 255, 255, 0.06);

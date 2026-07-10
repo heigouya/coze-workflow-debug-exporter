@@ -44,3 +44,13 @@ test("clear local capture action lives on report page instead of popup", () => {
   assert.doesNotMatch(popupHtml, /id="clear"/);
   assert.doesNotMatch(popupJs, /CLEAR_RUNS/);
 });
+
+test("loop node modal provides a selector for each captured batch", () => {
+  const html = fs.readFileSync(path.join(__dirname, "../report.html"), "utf8");
+  const js = fs.readFileSync(path.join(__dirname, "../report.js"), "utf8");
+
+  assert.match(html, /id="batch-picker"/);
+  assert.match(html, /id="batch-select"/);
+  assert.match(js, /node\.iterations/);
+  assert.match(js, /iterationIndex/);
+});

@@ -145,6 +145,30 @@ test("builds ordered AI prompt text with errored nodes highlighted", () => {
   assert.match(text, /节点 2: 结束/);
 });
 
+test("includes every loop batch when copying a loop node", () => {
+  const text = buildAiPrompt(
+    { workflowId: "wf1", executeId: "exec1", capturedAt: 1000 },
+    [
+      {
+        order: 1,
+        nodeName: "循环处理",
+        nodeType: "Loop",
+        status: "success",
+        iterations: [
+          { batchIndex: 0, status: "success", input: { item: 0 }, output: { result: "A" } },
+          { batchIndex: 1, status: "success", input: { item: 1 }, output: { result: "B" } },
+        ],
+      },
+    ],
+    { redact: true }
+  );
+
+  assert.match(text, /批次 1\/2/);
+  assert.match(text, /批次 2\/2/);
+  assert.match(text, /"result": "A"/);
+  assert.match(text, /"result": "B"/);
+});
+
 test("groups records by execute id and removes duplicate node history", () => {
   const first = normalizeCapture({
     method: "POST",
@@ -482,6 +506,42 @@ test("groups trace records by log id and ignores node history as a separate run"
   assert.equal(runs[0].nodes.length, 1);
   assert.equal(runs[0].nodes[0].nodeName, "视频抽帧");
   assert.deepEqual(summary, { runCount: 1, nodeCount: 1 });
+});
+
+test("keeps loop batches inside one node without losing each batch output", () => {
+  const records = [0, 1].map((batchIndex) =>
+    normalizeCapture({
+      method: "GET",
+      url:
+        `https://www.coze.cn/api/workflow_api/get_node_execute_history?` +
+        `workflow_id=wf1&space_id=sp1&execute_id=exec1&node_id=loop1&` +
+        `node_type=Loop&batch_index=${batchIndex}&sub_execute_id=sub-${batchIndex}`,
+      pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+      responseBody: JSON.stringify({
+        code: 0,
+        data: {
+          node_name: "循环处理",
+          node_type: "Loop",
+          input: { item: batchIndex },
+          output: { result: `result-${batchIndex}` },
+          status: "success",
+          batch_index: batchIndex,
+          sub_execute_id: `sub-${batchIndex}`,
+        },
+      }),
+      timestamp: 1000 + batchIndex,
+    })
+  );
+
+  const runs = groupRecords(records);
+
+  assert.equal(runs.length, 1);
+  assert.equal(runs[0].nodes.length, 1);
+  assert.equal(runs[0].nodes[0].iterations.length, 2);
+  assert.deepEqual(
+    runs[0].nodes[0].iterations.map((iteration) => iteration.output),
+    [{ result: "result-0" }, { result: "result-1" }]
+  );
 });
 
 test("focuses the latest run for the current workflow instead of summarizing all history", () => {

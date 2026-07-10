@@ -5,7 +5,7 @@ let state = {
   runs: [],
   selectedRunId: "",
   density: "default",
-  modal: { open: false, index: -1, tab: "all" },
+  modal: { open: false, index: -1, tab: "all", iterationIndex: 0 },
 };
 
 document.addEventListener("DOMContentLoaded", init);
@@ -133,6 +133,9 @@ function renderNodeCard(node, index) {
   const meta = card.querySelector(".card-meta");
   const parts = [`类型 ${node.nodeType || node.type || "未知"}`];
   if (node.duration) parts.push(`耗时 ${node.duration}`);
+  if (Array.isArray(node.iterations) && node.iterations.length) {
+    parts.push(`${node.iterations.length} 个批次`);
+  }
   meta.textContent = parts.join(" · ");
 
   const values = nodeValues(node);
@@ -212,6 +215,11 @@ function initModalControls() {
     const button = event.target.closest("button[data-tab]");
     if (button && !button.disabled) setTab(button.dataset.tab);
   });
+  modal.querySelector("#batch-select").addEventListener("change", (event) => {
+    state.modal.iterationIndex = Number(event.target.value) || 0;
+    state.modal.tab = "all";
+    renderModal();
+  });
   document.addEventListener("keydown", (event) => {
     if (!state.modal.open) return;
     if (event.key === "Escape") closeModal();
@@ -221,7 +229,7 @@ function initModalControls() {
 }
 
 function openModal(index) {
-  state.modal = { open: true, index, tab: "all" };
+  state.modal = { open: true, index, tab: "all", iterationIndex: 0 };
   document.getElementById("modal").hidden = false;
   document.body.classList.add("modal-open");
   renderModal();
@@ -239,6 +247,7 @@ function navModal(direction) {
   if (next < 0 || next >= nodes.length) return;
   state.modal.index = next;
   state.modal.tab = "all";
+  state.modal.iterationIndex = 0;
   renderModal();
 }
 
@@ -247,9 +256,12 @@ function renderModal() {
   const node = nodes[state.modal.index];
   if (!node) return closeModal();
 
-  const status = node.status || "unknown";
-  const isError = /fail|error|失败|异常/i.test(status) || Boolean(node.error);
-  const values = nodeValues(node);
+  const iterations = Array.isArray(node.iterations) ? node.iterations : [];
+  if (state.modal.iterationIndex >= iterations.length) state.modal.iterationIndex = 0;
+  const activeRecord = iterations[state.modal.iterationIndex] || node;
+  const status = activeRecord.status || node.status || "unknown";
+  const isError = /fail|error|失败|异常/i.test(status) || Boolean(activeRecord.error);
+  const values = nodeValues(activeRecord);
   const hasError = values.error !== undefined && values.error !== null;
 
   const modal = document.getElementById("modal");
@@ -260,7 +272,25 @@ function renderModal() {
     `${state.modal.index + 1}. ${node.nodeName || node.name || node.endpoint || "未命名节点"}`;
   const metaParts = [`类型 ${node.nodeType || node.type || "未知"}`, `状态 ${statusLabel(status)}`];
   if (node.duration) metaParts.push(`耗时 ${node.duration}`);
+  if (iterations.length) {
+    metaParts.push(`批次 ${state.modal.iterationIndex + 1}/${iterations.length}`);
+  }
   modal.querySelector(".modal-meta").textContent = metaParts.join(" · ");
+
+  const batchPicker = modal.querySelector("#batch-picker");
+  const batchSelect = modal.querySelector("#batch-select");
+  batchPicker.hidden = !iterations.length;
+  batchSelect.innerHTML = "";
+  iterations.forEach((iteration, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    const rawIndex = Number.isFinite(iteration.batchIndex)
+      ? `（原始序号 ${iteration.batchIndex}）`
+      : "";
+    option.textContent = `第 ${index + 1} 次 ${rawIndex}`.trim();
+    batchSelect.appendChild(option);
+  });
+  batchSelect.value = String(state.modal.iterationIndex);
 
   // 无错误时禁用「错误」标签；若当前正停在错误标签则回退到全部
   const errorTab = modal.querySelector('button[data-tab="error"]');
