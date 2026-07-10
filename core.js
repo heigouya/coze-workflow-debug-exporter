@@ -744,6 +744,11 @@
       if (run.traceId) run.id = `trace:${run.traceId}`;
       else if (run.logId) run.id = `log:${run.logId}`;
       else if (run.executeId) run.id = `execute:${run.executeId}`;
+      run.nodes.sort((a, b) => {
+        const ao = Number.isFinite(a.order) ? a.order : Number.MAX_SAFE_INTEGER;
+        const bo = Number.isFinite(b.order) ? b.order : Number.MAX_SAFE_INTEGER;
+        return ao - bo;
+      });
     }
     return Array.from(runs.values()).sort((a, b) => b.capturedAt - a.capturedAt);
   }
@@ -808,7 +813,10 @@
         return;
       }
       nodeFingerprintsByRun.get(key).add(nodeFingerprint);
-      const node = { ...labelledRecord, order: run.nodes.length + 1 };
+      const node = {
+        ...labelledRecord,
+        order: Number.isFinite(labelledRecord.order) ? labelledRecord.order : run.nodes.length + 1,
+      };
       nodesByRun.get(key).set(nodeFingerprint, node);
       run.nodes.push(node);
     } else {
@@ -829,11 +837,18 @@
   function mergeNode(target, source) {
     if (!target) return;
     mergeNodeIterations(target, source);
+    const targetWasTraceNode = target.kind === "trace-node";
     if (source.kind === "trace-node") target.kind = "trace-node";
     target.nodeName =
       source.kind === "trace-node"
         ? preferNodeName(source.nodeName, target.nodeName)
         : preferNodeName(target.nodeName, source.nodeName);
+    if (source.kind === "trace-node" && Number.isFinite(source.order)) {
+      target.order =
+        targetWasTraceNode && Number.isFinite(target.order)
+          ? Math.min(target.order, source.order)
+          : source.order;
+    }
     target.spanId = target.spanId || source.spanId;
     target.traceId = target.traceId || source.traceId;
     target.logId = target.logId || source.logId;
@@ -987,7 +1002,7 @@
   }
 
   function isExecutionResultLabel(value) {
-    return /^(运行成功|运行失败|运行中|运行完成|执行成功|执行失败|成功|失败|输入|输出|错误信息|复制|运行|调试|节点)(\s*\d+(\.\d+)?\s*(ms|s|秒|毫秒))?$/i.test(value) ||
+    return /^(试运行中|运行成功|运行失败|运行中|运行完成|执行成功|执行失败|成功|失败|输入|输出|错误信息|复制|运行|调试|节点)(\s*\d+(\.\d+)?\s*(ms|s|秒|毫秒))?$/i.test(value) ||
       /^\d+(\.\d+)?\s*(ms|s|秒|毫秒)$/i.test(value);
   }
 
@@ -1004,7 +1019,7 @@
     if (typeof value !== "string") return "";
     let text = value.replace(/\s+/g, "").trim();
     if (!text) return "";
-    text = text.replace(/^(运行成功|运行失败|运行中|运行完成|执行成功|执行失败|成功|失败)\d*(\.\d+)?(ms|s|秒|毫秒)?/i, "");
+    text = text.replace(/^(试运行中|运行成功|运行失败|运行中|运行完成|执行成功|执行失败|成功|失败)\d*(\.\d+)?(ms|s|秒|毫秒)?/i, "");
     const fieldIndex = firstPositiveIndex(
       text.indexOf("输入"),
       text.indexOf("输出"),

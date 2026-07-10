@@ -369,6 +369,17 @@ test("cleans concatenated canvas text into the real node display name", () => {
   });
 });
 
+test("cleans trial-running canvas text into the real node display name", () => {
+  const labels = sanitizeNodeLabels({
+    "122370": "试运行中0.000s视频脚本初稿1输入text输出data",
+    "122371": "试运行中46s",
+  });
+
+  assert.deepEqual(labels, {
+    "122370": "视频脚本初稿1",
+  });
+});
+
 test("falls back to readable node type when cached canvas label is invalid", () => {
   const record = normalizeCapture({
     method: "GET",
@@ -643,6 +654,93 @@ test("groups trace records by log id and ignores node history as a separate run"
   assert.equal(runs[0].nodes[0].nodeName, "视频抽帧");
   assert.equal(runs[0].nodes[0].iterations, undefined);
   assert.deepEqual(summary, { runCount: 1, nodeCount: 1 });
+});
+
+test("uses trace node order when node history captures arrive first", () => {
+  const firstHistory = normalizeCapture({
+    method: "GET",
+    url:
+      "https://www.coze.cn/api/workflow_api/get_node_execute_history?" +
+      "workflow_id=wf1&space_id=sp1&execute_id=exec1&node_id=node-video&node_type=LLM",
+    pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+    responseBody: JSON.stringify({
+      code: 0,
+      data: {
+        node_name: "试运行中0.000s",
+        node_type: "LLM",
+        input: { input: "story" },
+      },
+    }),
+    timestamp: 1000,
+  });
+  const secondHistory = normalizeCapture({
+    method: "GET",
+    url:
+      "https://www.coze.cn/api/workflow_api/get_node_execute_history?" +
+      "workflow_id=wf1&space_id=sp1&execute_id=exec1&node_id=node-start&node_type=Start",
+    pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+    responseBody: JSON.stringify({
+      code: 0,
+      data: {
+        node_name: "开始",
+        node_type: "Start",
+        output: { input: "story" },
+      },
+    }),
+    timestamp: 1001,
+  });
+  const trace = normalizeCapture({
+    method: "POST",
+    url: "https://www.coze.cn/api/workflow_api/get_trace?log_id=log1",
+    pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+    responseBody: JSON.stringify({
+      code: 0,
+      data: {
+        spans: [
+          {
+            span_id: "span-start",
+            log_id: "log1",
+            trace_id: "trace1",
+            type: "Start",
+            name: "开始",
+            status_code: 0,
+            start_time: 2000,
+            tags: [
+              tag("workflow_id", "wf1"),
+              tag("execute_id", "exec1"),
+              tag("workflow_node_id", "node-start"),
+              tag("node_name", "开始"),
+              tag("space_id", "sp1"),
+            ],
+          },
+          {
+            span_id: "span-video",
+            log_id: "log1",
+            trace_id: "trace1",
+            type: "WorkflowLLMCall",
+            name: "视频脚本初稿1",
+            status_code: 0,
+            start_time: 3000,
+            tags: [
+              tag("workflow_id", "wf1"),
+              tag("execute_id", "exec1"),
+              tag("workflow_node_id", "node-video"),
+              tag("node_name", "视频脚本初稿1"),
+              tag("space_id", "sp1"),
+            ],
+          },
+        ],
+      },
+    }),
+    timestamp: 4000,
+  });
+
+  const runs = groupRecords([firstHistory, secondHistory, trace]);
+
+  assert.deepEqual(
+    runs[0].nodes.map((node) => node.nodeName),
+    ["开始", "视频脚本初稿1"]
+  );
 });
 
 test("keeps loop batches inside one node without losing each batch output", () => {
