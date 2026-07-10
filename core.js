@@ -54,8 +54,10 @@
     const wanted = new Set(keys);
     const seen = new Set();
     const stack = [value];
-    while (stack.length) {
-      const item = stack.shift();
+    let index = 0;
+    while (index < stack.length) {
+      const item = stack[index];
+      index += 1;
       if (!item || typeof item !== "object" || seen.has(item)) continue;
       seen.add(item);
       for (const [key, child] of Object.entries(item)) {
@@ -86,9 +88,9 @@
     return INTERESTING_ENDPOINTS.some((name) => parsed.pathname.includes(name));
   }
 
-  function extractIds(input) {
-    const req = tryJson(input.requestBody);
-    const res = tryJson(input.responseBody);
+  function extractIds(input, parsedBodies) {
+    const req = parsedBodies ? parsedBodies.request : tryJson(input.requestBody);
+    const res = parsedBodies ? parsedBodies.response : tryJson(input.responseBody);
     const pageUrl = input.pageUrl || "";
     const url = input.url || "";
     const debugUrl =
@@ -148,9 +150,10 @@
 
   function normalizeCapture(input) {
     const endpoint = endpointName(input.url || "");
-    const ids = extractIds(input);
-    const data = unwrapData(input.responseBody);
     const rawResponse = tryJson(input.responseBody);
+    const rawRequest = tryJson(input.requestBody);
+    const ids = extractIds(input, { request: rawRequest, response: rawResponse });
+    const data = unwrapData(rawResponse);
     const workflowName =
       ids.workflowName ||
       cleanWorkflowName(findDeep(data, ["workflow_name", "workflowName", "workflow_title", "workflowTitle"])) ||
@@ -171,7 +174,7 @@
       workflowName,
       startedAt,
       timestamp: input.timestamp || Date.now(),
-      rawRequest: tryJson(input.requestBody),
+      rawRequest,
       rawResponse,
     };
 
@@ -542,6 +545,33 @@
       rawResponse: record.rawResponse,
     };
     return stableFingerprintJson(payload);
+  }
+
+  function limitRecords(records, options) {
+    const opts = options || {};
+    const maxRecords = Number.isFinite(opts.maxRecords) ? opts.maxRecords : Infinity;
+    const maxChars = Number.isFinite(opts.maxChars) ? opts.maxChars : Infinity;
+    const source = Array.isArray(records) ? records : [];
+    const selected = source.slice(-Math.max(0, maxRecords));
+    const sizes = selected.map(recordSizeChars);
+    let totalChars = sizes.reduce((sum, size) => sum + size, 0);
+    let droppedCount = source.length - selected.length;
+
+    while (selected.length && totalChars > maxChars) {
+      totalChars -= sizes.shift();
+      selected.shift();
+      droppedCount += 1;
+    }
+
+    return { records: selected, totalChars, droppedCount };
+  }
+
+  function recordSizeChars(record) {
+    try {
+      return JSON.stringify(record).length;
+    } catch (_error) {
+      return 0;
+    }
   }
 
   function stableFingerprintJson(value) {
@@ -1022,6 +1052,7 @@
     fingerprintRecord,
     groupRecords,
     isInterestingCozeRequest,
+    limitRecords,
     normalizeCapture,
     redactSensitiveValue,
     renderJsonHtml,

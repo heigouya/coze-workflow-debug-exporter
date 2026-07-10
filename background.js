@@ -3,6 +3,7 @@ importScripts("core.js");
 const STORAGE_KEY = "cozeWorkflowDebugRecords";
 const LABELS_KEY = "cozeWorkflowNodeLabels";
 const MAX_RECORDS = 500;
+const MAX_STORAGE_CHARS = 40_000_000;
 let captureQueue = Promise.resolve();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -30,6 +31,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({
         records,
         runs: CozeDebuggerCore.groupRecords(records, { nodeLabels }),
+        storageStats: getStorageStats(records),
       });
     });
     return true;
@@ -72,7 +74,11 @@ async function handleCapture(payload, sender) {
   }
 
   records.push(record);
-  const limited = records.slice(-MAX_RECORDS);
+  const limitedResult = CozeDebuggerCore.limitRecords(records, {
+    maxRecords: MAX_RECORDS,
+    maxChars: MAX_STORAGE_CHARS,
+  });
+  const limited = limitedResult.records;
   await setRecords(limited);
 
   if (record.kind === "node-history" || record.kind === "workflow-run") {
@@ -87,7 +93,15 @@ async function handleCapture(payload, sender) {
     chrome.action.setBadgeBackgroundColor({ color: "#4D53E8" });
   }
 
-  return { ok: true, record };
+  return { ok: true, record, storageStats: getStorageStats(limited) };
+}
+
+function getStorageStats(records) {
+  const measured = CozeDebuggerCore.limitRecords(records);
+  return {
+    recordCount: records.length,
+    approxChars: measured.totalChars,
+  };
 }
 
 async function handleNodeLabels(payload) {

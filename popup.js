@@ -5,6 +5,7 @@ async function init() {
   const textEl = contextEl.querySelector(".ctx-text");
   const runCountEl = document.getElementById("run-count");
   const nodeCountEl = document.getElementById("node-count");
+  const cacheSizeEl = document.getElementById("cache-size");
 
   const [context, data] = await Promise.all([
     send({ type: "GET_ACTIVE_COZE_CONTEXT" }),
@@ -40,6 +41,7 @@ async function init() {
   const summary = CozeDebuggerCore.summarizeRuns(focusedRuns);
   runCountEl.textContent = String(summary.runCount);
   nodeCountEl.textContent = String(summary.nodeCount);
+  cacheSizeEl.textContent = `本地缓存约 ${formatApproxSize(data?.storageStats?.approxChars)}`;
 
   document.getElementById("open-report").addEventListener("click", () => {
     send({ type: "OPEN_REPORT" });
@@ -48,4 +50,11 @@ async function init() {
 
 function send(message) {
   return new Promise((resolve) => chrome.runtime.sendMessage(message, resolve));
+}
+
+function formatApproxSize(chars) {
+  const value = Number(chars || 0);
+  if (value < 1000) return `${value} B`;
+  if (value < 1_000_000) return `${(value / 1000).toFixed(1)} KB`;
+  return `${(value / 1_000_000).toFixed(1)} MB`;
 }

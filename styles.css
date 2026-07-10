@@ -213,6 +213,12 @@ button:disabled {
   font-size: 12px;
 }
 
+.popup-cache {
+  font-size: 12px;
+  margin: -2px 0 8px;
+  text-align: center;
+}
+
 .popup button {
   margin-top: 4px;
   width: 100%;

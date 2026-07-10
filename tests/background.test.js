@@ -20,6 +20,16 @@ test("keeps both records when captures arrive at the same time", async () => {
   );
 });
 
+test("reports the approximate local cache size", async () => {
+  const harness = loadBackgroundHarness();
+  await harness.capture(2001);
+
+  const data = await harness.send({ type: "GET_RUNS" });
+
+  assert.equal(data.storageStats.recordCount, 1);
+  assert.ok(data.storageStats.approxChars > 0);
+});
+
 function loadBackgroundHarness({ getDelay = 0, setDelay = 0 } = {}) {
   let listener;
   let storage = {
@@ -70,24 +80,27 @@ function loadBackgroundHarness({ getDelay = 0, setDelay = 0 } = {}) {
       return storage.cozeWorkflowDebugRecords;
     },
     capture(id) {
+      return this.send({
+        type: "COZE_NETWORK_CAPTURE",
+        payload: {
+          url: "https://www.coze.cn/api/workflow_api/test_run",
+          method: "POST",
+          timestamp: id,
+          requestBody: JSON.stringify({
+            workflow_id: "wf",
+            execute_id: `exec-${id}`,
+          }),
+          responseBody: JSON.stringify({
+            code: 0,
+            data: { execute_id: `exec-${id}` },
+          }),
+        },
+      });
+    },
+    send(message) {
       return new Promise((resolve) => {
         listener(
-          {
-            type: "COZE_NETWORK_CAPTURE",
-            payload: {
-              url: "https://www.coze.cn/api/workflow_api/test_run",
-              method: "POST",
-              timestamp: id,
-              requestBody: JSON.stringify({
-                workflow_id: "wf",
-                execute_id: `exec-${id}`,
-              }),
-              responseBody: JSON.stringify({
-                code: 0,
-                data: { execute_id: `exec-${id}` },
-              }),
-            },
-          },
+          message,
           { tab: { id: 1 } },
           resolve
         );

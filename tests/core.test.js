@@ -7,6 +7,7 @@ const {
   fingerprintRecord,
   focusRuns,
   groupRecords,
+  limitRecords,
   renderJsonHtml,
   normalizeCapture,
   redactSensitiveValue,
@@ -41,6 +42,43 @@ test("normalizes workflow test_run response with debug_url and execute_id", () =
   assert.equal(record.spaceId, "7555038132773896234");
   assert.equal(record.executeId, "7413647890307281111");
   assert.equal(record.status, "success");
+});
+
+test("parses each captured request and response body only once", () => {
+  const originalParse = JSON.parse;
+  let parseCount = 0;
+  JSON.parse = function countedParse(value) {
+    parseCount += 1;
+    return originalParse(value);
+  };
+
+  try {
+    normalizeCapture({
+      method: "POST",
+      url: "https://www.coze.cn/api/workflow_api/test_run",
+      requestBody: JSON.stringify({ workflow_id: "wf1", space_id: "sp1" }),
+      responseBody: JSON.stringify({ code: 0, data: { execute_id: "exec1" } }),
+      timestamp: 1000,
+    });
+  } finally {
+    JSON.parse = originalParse;
+  }
+
+  assert.equal(parseCount, 2);
+});
+
+test("drops the oldest records when the cache exceeds its size limit", () => {
+  const records = [1, 2, 3].map((id) => ({ id, payload: "x".repeat(40) }));
+  const oneRecordChars = JSON.stringify(records[0]).length;
+
+  const limited = limitRecords(records, {
+    maxRecords: 10,
+    maxChars: oneRecordChars * 2,
+  });
+
+  assert.deepEqual(limited.records.map((record) => record.id), [2, 3]);
+  assert.equal(limited.droppedCount, 1);
+  assert.ok(limited.totalChars <= oneRecordChars * 2);
 });
 
 test("normalizes node execute history response with node input and output", () => {

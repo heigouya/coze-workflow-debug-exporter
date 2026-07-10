@@ -5,6 +5,7 @@ let state = {
   runs: [],
   selectedRunId: "",
   density: "default",
+  storageStats: { recordCount: 0, approxChars: 0 },
   modal: { open: false, index: -1, tab: "all", iterationIndex: 0 },
 };
 
@@ -45,6 +46,7 @@ async function init() {
 async function load() {
   const data = await send({ type: "GET_RUNS" });
   state.runs = data?.runs || [];
+  state.storageStats = data?.storageStats || { recordCount: 0, approxChars: 0 };
   if (!state.selectedRunId && state.runs[0]) state.selectedRunId = state.runs[0].id;
   render();
 }
@@ -75,7 +77,7 @@ function render() {
     return;
   }
 
-  summary.textContent = `本地共 ${state.runs.length} 次日志；当前 ${run.records.length} 条接口记录，${run.nodes.length} 条节点详情`;
+  summary.textContent = `本地共 ${state.runs.length} 次日志；缓存约 ${formatApproxSize(state.storageStats.approxChars)}；当前 ${run.records.length} 条接口记录，${run.nodes.length} 条节点详情`;
   layoutGallery();
 }
 
@@ -474,4 +476,11 @@ function toast(text) {
   node.textContent = text;
   document.body.appendChild(node);
   setTimeout(() => node.remove(), 1800);
+}
+
+function formatApproxSize(chars) {
+  const value = Number(chars || 0);
+  if (value < 1000) return `${value} B`;
+  if (value < 1_000_000) return `${(value / 1000).toFixed(1)} KB`;
+  return `${(value / 1_000_000).toFixed(1)} MB`;
 }

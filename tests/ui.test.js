@@ -54,3 +54,14 @@ test("loop node modal provides a selector for each captured batch", () => {
   assert.match(js, /node\.iterations/);
   assert.match(js, /iterationIndex/);
 });
+
+test("popup and report show the approximate cache size", () => {
+  const popupHtml = fs.readFileSync(path.join(__dirname, "../popup.html"), "utf8");
+  const popupJs = fs.readFileSync(path.join(__dirname, "../popup.js"), "utf8");
+  const reportJs = fs.readFileSync(path.join(__dirname, "../report.js"), "utf8");
+
+  assert.match(popupHtml, /id="cache-size"/);
+  assert.match(popupJs, /storageStats/);
+  assert.match(reportJs, /storageStats/);
+  assert.match(reportJs, /缓存约/);
+});
