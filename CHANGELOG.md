@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.6
+
+- Preserves every repeated Trace span for loop-body and batch nodes, even when Coze omits `batch_index` and `sub_execute_id`.
+- Keeps repeated executions under one node card and reuses the existing iteration selector to inspect each input, output, and error.
+- Avoids creating false iterations for ordinary single-run nodes or duplicate captures of the same span.
+- Adds a six-execution regression test matching the reported `image2image` loop behavior.
+
 ## v0.2.5
 
 - Serializes capture writes so simultaneous Trace/history responses cannot overwrite each other in local storage.

@@ -461,8 +461,98 @@ test("normalizes get_trace spans into node cards with stable display names", () 
   assert.equal(runs[0].nodes.length, 1);
   assert.equal(runs[0].nodes[0].nodeName, "视频抽帧");
   assert.equal(runs[0].nodes[0].nodeId, "122370");
+  assert.equal(runs[0].nodes[0].iterations, undefined);
   assert.deepEqual(runs[0].nodes[0].input, { video: "https://example.com/a.mp4" });
   assert.deepEqual(runs[0].nodes[0].output, { data: [1, 2], msg: "success" });
+});
+
+test("keeps repeated trace spans when node history arrives first", () => {
+  const nodeHistory = normalizeCapture({
+    method: "GET",
+    url:
+      "https://www.coze.cn/api/workflow_api/get_node_execute_history?" +
+      "workflow_id=wf1&space_id=sp1&execute_id=exec-loop&node_id=image2image-node&" +
+      "node_type=WorkflowPluginTool",
+    pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+    responseBody: JSON.stringify({
+      code: 0,
+      data: {
+        node_name: "image2image",
+        node_type: "WorkflowPluginTool",
+        input: {
+          prompt: "prompt-1",
+          url: "https://example.com/frame_001.jpg",
+        },
+        output: {
+          code: 0,
+          data: { images: [{ image_url: "https://example.com/result-1.jpg" }] },
+          msg: "success",
+        },
+      },
+    }),
+    timestamp: 500,
+  });
+  const trace = normalizeCapture({
+    method: "POST",
+    url: "https://www.coze.cn/api/workflow_api/get_trace?log_id=log-loop",
+    pageUrl: "https://www.coze.cn/work_flow?workflow_id=wf1&space_id=sp1",
+    responseBody: JSON.stringify({
+      code: 0,
+      data: {
+        spans: Array.from({ length: 6 }, (_item, index) => ({
+          span_id: `image-span-${index + 1}`,
+          parent_id: "loop-span",
+          log_id: "log-loop",
+          trace_id: "trace-loop",
+          type: "WorkflowPluginTool",
+          name: "image2image",
+          status_code: 0,
+          start_time: 1000 + index,
+          input: {
+            content: JSON.stringify({
+              prompt: `prompt-${index + 1}`,
+              url: `https://example.com/frame_${String(index + 1).padStart(3, "0")}.jpg`,
+            }),
+            type: 0,
+          },
+          output: {
+            content: JSON.stringify({
+              code: 0,
+              data: { images: [{ image_url: `https://example.com/result-${index + 1}.jpg` }] },
+              msg: "success",
+            }),
+            type: 0,
+          },
+          tags: [
+            tag("workflow_id", "wf1"),
+            tag("execute_id", "exec-loop"),
+            tag("workflow_node_id", "image2image-node"),
+            tag("node_name", "image2image"),
+            tag("span_type", "WorkflowPluginTool"),
+            tag("space_id", "sp1"),
+          ],
+        })),
+      },
+    }),
+    timestamp: 2000,
+  });
+
+  const runs = groupRecords([nodeHistory, trace]);
+  const node = runs[0].nodes[0];
+
+  assert.equal(runs[0].nodes.length, 1);
+  assert.equal(node.iterations.length, 6);
+  assert.deepEqual(
+    node.iterations.map((iteration) => iteration.input.url),
+    Array.from(
+      { length: 6 },
+      (_item, index) => `https://example.com/frame_${String(index + 1).padStart(3, "0")}.jpg`
+    )
+  );
+  assert.deepEqual(
+    node.iterations.map((iteration) => iteration.output.data.images[0].image_url),
+    Array.from({ length: 6 }, (_item, index) => `https://example.com/result-${index + 1}.jpg`)
+  );
 });
 
 test("groups trace records by log id and ignores node history as a separate run", () => {
@@ -551,6 +641,7 @@ test("groups trace records by log id and ignores node history as a separate run"
   assert.equal(runs[0].records.length, 3);
   assert.equal(runs[0].nodes.length, 1);
   assert.equal(runs[0].nodes[0].nodeName, "视频抽帧");
+  assert.equal(runs[0].nodes[0].iterations, undefined);
   assert.deepEqual(summary, { runCount: 1, nodeCount: 1 });
 });
 
